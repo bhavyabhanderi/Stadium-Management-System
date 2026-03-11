@@ -1,0 +1,41 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "User Login"; Layout = "_Layout"; }
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="text-center">
+            <div class="auth-crest">🎫</div>
+            <h2>Fan Login</h2>
+            <p class="subtitle">Sign in to book and manage your tickets</p>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success py-2">@TempData["Success"]</div>
+        }
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger py-2">@ViewBag.Error</div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label class="form-label">User ID</label>
+                <input asp-for="Id" class="form-control" placeholder="Check your email for your User ID" />
+                <div class="form-text"><i class="fas fa-envelope text-muted"></i> Your User ID was sent to your email when you registered.</div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter password" />
+            </div>
+            <button type="submit" class="btn btn-user w-100 py-2">Login →</button>
+        </form>
+        <hr class="my-3">
+        <div class="text-center" style="font-size:.85rem;">
+            Don't have an account? <a href="/User/Register" style="color:var(--cricket-green);font-weight:600;">Register here</a>
+        </div>
+        <div class="text-center mt-2">
+            <a href="/" style="font-size:.8rem; color:#aaa;">← Back to Home</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+@model List<Ticket>
+@{ ViewData["Title"] = "All Tickets"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_StaffSidebar")
+    <div class="main-content">
+        <div class="top-bar"><h4>🎫 All Ticket Bookings</h4></div>
+        <div class="page-body">
+            <div class="content-card">
+                <div class="content-card-title"><i class="fas fa-ticket text-success"></i> All Bookings (@Model.Count)</div>
+                <div class="table-responsive">
+                    <table class="table-custom w-100">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Match</th><th>User</th><th>Stand</th>
+                                <th>Qty</th><th>Total</th><th>Payment</th><th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model)
+                            {
+                                <tr>
+                                    <td>#@t.TicketId</td>
+                                    <td>
+                                        <strong>@t.MatchName</strong>
+                                        <div style="font-size:.75rem;color:#888;">@t.MatchDate</div>
+                                    </td>
+                                    <td>
+                                        @t.UserName
+                                        <div style="font-size:.75rem;color:#888;">#@t.UserId</div>
+                                    </td>
+                                    <td><span class="ticket-badge stand-@t.Stand">@t.Stand</span></td>
+                                    <td>@t.NoOfTickets</td>
+                                    <td><strong>₹@t.TotalPayments.ToString("N0")</strong></td>
+                                    <td>@t.PaymentMethod</td>
+                                    <td>@t.MatchDate</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

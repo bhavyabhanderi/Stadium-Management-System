@@ -1,0 +1,32 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "Staff Login"; Layout = "_Layout"; }
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="text-center">
+            <div class="auth-crest">🛡️</div>
+            <h2>Staff Login</h2>
+            <p class="subtitle">Authorized personnel only</p>
+        </div>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger py-2">@ViewBag.Error</div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label class="form-label">Staff ID</label>
+                <input asp-for="Id" class="form-control" placeholder="Enter Staff ID" />
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter password" />
+            </div>
+            <button type="submit" class="btn btn-staff w-100 py-2">Login →</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="/" style="font-size:.8rem; color:#aaa;">← Back to Home</a>
+        </div>
+    </div>
+</div>

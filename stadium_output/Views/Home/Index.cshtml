@@ -1,0 +1,128 @@
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_Layout";
+}
+
+<div class="home-hero">
+    <div class="home-hero-content">
+        <div class="hero-badge">
+            <i class="fas fa-star"></i> World's Largest Cricket Stadium
+        </div>
+        <h1>Narendra Modi<br><span>Cricket Stadium</span></h1>
+        <p class="tagline">Ahmedabad, Gujarat &nbsp;·&nbsp; Est. 2020 &nbsp;·&nbsp; Capacity 1,32,000</p>
+
+        <div class="home-cards">
+            <a href="/Staff/Login" class="home-card">
+                <div class="card-icon">🛡️</div>
+                <h3>Staff Portal</h3>
+                <p>Manage matches, view tickets &amp; users</p>
+            </a>
+            <a href="/User/Register" class="home-card">
+                <div class="card-icon">📝</div>
+                <h3>Register</h3>
+                <p>Create a new fan account</p>
+            </a>
+            <a href="/User/Login" class="home-card">
+                <div class="card-icon">🎫</div>
+                <h3>Fan Login</h3>
+                <p>Book tickets &amp; view your bookings</p>
+            </a>
+        </div>
+
+        <div class="home-footer-meta">
+            <span><i class="fas fa-map-marker-alt"></i> Motera, Ahmedabad</span>
+            <span><i class="fas fa-users"></i> 1,32,000 Capacity</span>
+            <span><i class="fas fa-trophy"></i> ICC Certified</span>
+        </div>
+    </div>
+</div>
+
+<!-- Feature Highlights Strip -->
+<div class="home-features-strip">
+    <div class="feature-item">
+        <i class="fas fa-shield-halved"></i>
+        <span>Secure Booking</span>
+    </div>
+    <div class="feature-item">
+        <i class="fas fa-bolt"></i>
+        <span>Instant Confirmation</span>
+    </div>
+    <div class="feature-item">
+        <i class="fas fa-ticket"></i>
+        <span>Multiple Stand Options</span>
+    </div>
+    <div class="feature-item">
+        <i class="fas fa-credit-card"></i>
+        <span>UPI & Card Payments</span>
+    </div>
+    <div class="feature-item">
+        <i class="fas fa-mobile-screen"></i>
+        <span>Mobile Friendly</span>
+    </div>
+</div>
+
+<!-- Upcoming Highlight Matches -->
+<div class="home-matches-section">
+    <h2 class="home-section-title">🔥 Upcoming Highlights</h2>
+    <div class="home-match-row">
+
+        <!-- IND vs PAK -->
+        <div class="home-match-chip hot">
+            <div class="home-match-flags">
+                <img src="https://flagcdn.com/w80/in.png" class="home-flag" alt="IND" />
+                <span class="home-vs">VS</span>
+                <img src="https://flagcdn.com/w80/pk.png" class="home-flag" alt="PAK" />
+            </div>
+            <div class="home-match-label">IND vs PAK</div>
+            <div class="home-match-meta">T20 World Cup · Jun 15</div>
+            <span class="hot-badge">🔥 HOT</span>
+        </div>
+
+        <!-- IND vs AUS -->
+        <div class="home-match-chip">
+            <div class="home-match-flags">
+                <img src="https://flagcdn.com/w80/in.png" class="home-flag" alt="IND" />
+                <span class="home-vs">VS</span>
+                <img src="https://flagcdn.com/w80/au.png" class="home-flag" alt="AUS" />
+            </div>
+            <div class="home-match-label">IND vs AUS</div>
+            <div class="home-match-meta">BGT Series · Feb 10</div>
+        </div>
+
+        <!-- IND vs ENG -->
+        <div class="home-match-chip">
+            <div class="home-match-flags">
+                <img src="https://flagcdn.com/w80/in.png" class="home-flag" alt="IND" />
+                <span class="home-vs">VS</span>
+                <img src="https://flagcdn.com/w80/gb-eng.png" class="home-flag" alt="ENG" />
+            </div>
+            <div class="home-match-label">IND vs ENG</div>
+            <div class="home-match-meta">Test Series · Jan 25</div>
+        </div>
+
+        <!-- World Cup Final -->
+        <div class="home-match-chip hot">
+            <div class="home-match-flags">
+                <img src="https://flagcdn.com/w80/in.png" class="home-flag" alt="IND" />
+                <span class="home-vs">VS</span>
+                <img src="https://flagcdn.com/w80/au.png" class="home-flag" alt="AUS" />
+            </div>
+            <div class="home-match-label">WC Final</div>
+            <div class="home-match-meta">T20 World Cup · Jun 29</div>
+            <span class="hot-badge">🏆 FINAL</span>
+        </div>
+
+        <!-- IPL -->
+        <div class="home-match-chip ipl">
+            <div class="home-match-flags" style="background:linear-gradient(135deg,#1a0533,#5b0099);">
+                <span style="font-size:1.8rem;">🏆</span>
+            </div>
+            <div class="home-match-label">CSK vs MI</div>
+            <div class="home-match-meta">IPL 2025 · Mar 22</div>
+        </div>
+
+    </div>
+    <div class="text-center mt-4">
+        <a href="/User/Login" class="btn-home-cta"><i class="fas fa-ticket me-2"></i>View All Matches & Book Now</a>
+    </div>
+</div>

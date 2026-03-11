@@ -1,0 +1,671 @@
+@model BookTicketViewModel
+@{ ViewData["Title"] = "Book Ticket"; Layout = "_Layout"; }
+@{
+    var userName = Context.Session.GetString("UserName") ?? "user";
+    var selectedMatchId = Model.MatchId;
+}
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_UserSidebar")
+    <div class="main-content">
+        <div class="top-bar">
+            <h4>🎫 Book Ticket</h4>
+            <div class="user-info"><i class="fas fa-user-circle"></i><span>@userName</span></div>
+        </div>
+        <div class="page-body">
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible">
+                    <i class="fas fa-exclamation-circle me-2"></i>@ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Step Progress Bar -->
+            <div class="booking-steps mb-4">
+                <div class="step active" id="step-ind-1"><span class="step-num">1</span><span class="step-lbl">Match &amp; Seat</span></div>
+                <div class="step-line"></div>
+                <div class="step" id="step-ind-2"><span class="step-num">2</span><span class="step-lbl">Payment</span></div>
+                <div class="step-line"></div>
+                <div class="step" id="step-ind-3"><span class="step-num">3</span><span class="step-lbl">Confirm</span></div>
+            </div>
+
+            <form method="post" asp-action="BookTicket" id="bookForm">
+
+                <!-- STEP 1: Match & Seat -->
+                <div id="page1">
+                    <div class="row g-3">
+                        <div class="col-lg-7">
+
+                            <div class="content-card">
+                                <div class="content-card-title"><i class="fas fa-calendar-days text-primary"></i> Select Match</div>
+                                <select asp-for="MatchId" class="form-control" id="matchSelect" onchange="onMatchChange()">
+                                    <option value="">-- Choose a match --</option>
+                                    @foreach (var m in (List<Match>)ViewBag.Matches)
+                                    {
+                                        var isSelected = (m.MatchId == selectedMatchId);
+                                        <option value="@m.MatchId"
+                                                data-name="@m.MatchName"
+                                                data-date="@m.MatchDate"
+                                                data-time="@m.MatchTime"
+                                                data-format="@m.MatchFormat"
+                                                data-series="@m.SeriesTournamentName"
+                                                selected="@isSelected">
+                                            @m.MatchName — @m.MatchDate (@m.MatchFormat)
+                                        </option>
+                                    }
+                                </select>
+                                <div id="matchPreview" class="match-preview-strip mt-2" style="display:none;"></div>
+                            </div>
+
+                            <div class="content-card mt-3">
+                                <div class="content-card-title"><i class="fas fa-chair text-primary"></i> Select Stand</div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="stand-card-new" data-stand="A" data-price="1000"
+                                             onclick="selectStand('A', 1000)" style="--stand-color:#2e7d32;">
+                                            <div class="stand-card-header">
+                                                <span class="stand-letter" style="background:#2e7d32;">A</span>
+                                                <span class="stand-label">General</span>
+                                            </div>
+                                            <div class="stand-price-tag">&#8377;1,000</div>
+                                            <div class="stand-desc">Open seating, ground-level view</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stand-card-new" data-stand="B" data-price="7000"
+                                             onclick="selectStand('B', 7000)" style="--stand-color:#1565c0;">
+                                            <div class="stand-card-header">
+                                                <span class="stand-letter" style="background:#1565c0;">B</span>
+                                                <span class="stand-label">Premium</span>
+                                            </div>
+                                            <div class="stand-price-tag">&#8377;7,000</div>
+                                            <div class="stand-desc">Covered, mid-pitch reserved</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stand-card-new" data-stand="C" data-price="5000"
+                                             onclick="selectStand('C', 5000)" style="--stand-color:#6a1b9a;">
+                                            <div class="stand-card-header">
+                                                <span class="stand-letter" style="background:#6a1b9a;">C</span>
+                                                <span class="stand-label">Club</span>
+                                            </div>
+                                            <div class="stand-price-tag">&#8377;5,000</div>
+                                            <div class="stand-desc">Cushioned, close pitch view</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stand-card-new" data-stand="D" data-price="10000"
+                                             onclick="selectStand('D', 10000)" style="--stand-color:#b71c1c;">
+                                            <div class="stand-card-header">
+                                                <span class="stand-letter" style="background:#b71c1c;">D</span>
+                                                <span class="stand-label">VIP</span>
+                                            </div>
+                                            <div class="stand-price-tag">&#8377;10,000</div>
+                                            <div class="stand-desc">Lounge access, best seats</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" asp-for="Stand" id="standInput" />
+                            </div>
+
+                            <div class="content-card mt-3">
+                                <div class="content-card-title"><i class="fas fa-hashtag text-primary"></i> Number of Tickets</div>
+                                <div class="qty-row">
+                                    <button type="button" class="qty-btn" onclick="changeQty(-1)">&#8722;</button>
+                                    <input asp-for="NoOfTickets" type="number" min="1" max="20"
+                                           class="qty-input" id="numTickets" value="1" oninput="calcTotal()" />
+                                    <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+                                    <span class="qty-hint">Max 20 per booking</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="col-lg-5">
+                            <div class="order-summary-card">
+                                <div class="order-summary-title">&#x1F9FE; Order Summary</div>
+                                <div class="order-row"><span>Match</span><strong id="sum-match">&#8212;</strong></div>
+                                <div class="order-row"><span>Stand</span><strong id="sum-stand">&#8212;</strong></div>
+                                <div class="order-row"><span>Date</span><strong id="sum-date">&#8212;</strong></div>
+                                <div class="order-row"><span>Price/ticket</span><strong id="sum-price">&#8377;0</strong></div>
+                                <div class="order-row"><span>Qty</span><strong id="sum-qty">0</strong></div>
+                                <div class="order-divider"></div>
+                                <div class="order-total-row">
+                                    <span>Total Payable</span>
+                                    <strong id="sum-total">&#8377;0</strong>
+                                </div>
+                                <button type="button" class="btn-proceed mt-3" onclick="goToPayment()">
+                                    Proceed to Payment <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Payment -->
+                <div id="page2" style="display:none;">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="content-card">
+                                <div class="content-card-title"><i class="fas fa-lock text-success"></i> Secure Payment</div>
+
+                                <div class="pay-amount-banner">
+                                    <span>Amount to Pay</span>
+                                    <strong id="pay-banner-amount">&#8377;0</strong>
+                                </div>
+
+                                <!-- Payment Method Tabs -->
+                                <div class="pay-method-tabs">
+                                    <button type="button" class="pay-tab active" onclick="selectPayMethod('UPI', this)">
+                                        <i class="fas fa-mobile-screen-button"></i> UPI
+                                    </button>
+                                    <button type="button" class="pay-tab" onclick="selectPayMethod('Debit Card', this)">
+                                        <i class="fas fa-credit-card"></i> Debit Card
+                                    </button>
+                                    <button type="button" class="pay-tab" onclick="selectPayMethod('Credit Card', this)">
+                                        <i class="fas fa-credit-card"></i> Credit Card
+                                    </button>
+                                    <button type="button" class="pay-tab" onclick="selectPayMethod('Netbanking', this)">
+                                        <i class="fas fa-building-columns"></i> Net Banking
+                                    </button>
+                                </div>
+
+                                <input type="hidden" asp-for="PaymentMethod" id="paymentMethodInput" value="UPI" />
+
+                                <!-- UPI Panel -->
+                                <div id="panel-UPI" class="pay-panel">
+                                    <div class="upi-section">
+                                        <div class="upi-qr-box">
+                                            <svg width="140" height="140" viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+                                                <rect width="140" height="140" fill="white"/>
+                                                <rect x="8" y="8" width="38" height="38" fill="none" stroke="#1a1a2e" stroke-width="4"/>
+                                                <rect x="14" y="14" width="26" height="26" fill="#1a1a2e"/>
+                                                <rect x="94" y="8" width="38" height="38" fill="none" stroke="#1a1a2e" stroke-width="4"/>
+                                                <rect x="100" y="14" width="26" height="26" fill="#1a1a2e"/>
+                                                <rect x="8" y="94" width="38" height="38" fill="none" stroke="#1a1a2e" stroke-width="4"/>
+                                                <rect x="14" y="100" width="26" height="26" fill="#1a1a2e"/>
+                                                <rect x="52" y="8" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="62" y="8" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="72" y="8" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="18" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="72" y="18" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="28" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="62" y="28" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="8" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="28" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="72" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="94" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="114" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="126" y="52" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="8" y="62" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="28" y="62" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="62" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="72" y="62" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="100" y="62" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="114" y="62" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="8" y="72" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="38" y="72" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="72" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="80" y="72" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="108" y="72" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="126" y="72" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="80" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="72" y="80" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="94" y="80" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="114" y="80" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="94" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="80" y="94" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="100" y="94" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="126" y="94" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="108" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="62" y="108" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="94" y="108" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="108" y="108" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="52" y="118" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="72" y="118" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="100" y="118" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="126" y="118" width="6" height="6" fill="#1a1a2e"/>
+                                                <rect x="58" y="58" width="24" height="24" rx="4" fill="#5f259f"/>
+                                                <text x="70" y="74" text-anchor="middle" font-size="9" font-weight="bold" fill="white">UPI</text>
+                                            </svg>
+                                            <div class="upi-merchant">stadium&#64;upi</div>
+                                            <div class="upi-scan-hint">Scan with any UPI app</div>
+                                        </div>
+                                        <div class="upi-divider"><span>OR</span></div>
+                                        <div class="upi-id-section">
+                                            <label class="form-label fw-bold">Enter UPI ID</label>
+                                            <div class="upi-id-input-row">
+                                                <input type="text" id="upiId" class="form-control" placeholder="yourname@@okaxis / @@ybl / @@paytm" />
+                                                <button type="button" class="btn-verify" onclick="verifyUPI()">Verify</button>
+                                            </div>
+                                            <div id="upiStatus" class="upi-status" style="display:none;"></div>
+                                            <div class="upi-apps-row mt-3">
+                                                <span class="upi-app-btn" onclick="fillUPI('gpay')">
+                                                    <!-- Google Pay SVG -->
+                                                    <svg width="22" height="22" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                                      <path fill="#4285F4" d="M24 9.5c3.5 0 6.6 1.3 9 3.4l6.7-6.7C35.7 2.5 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.8 6C12.3 13.2 17.7 9.5 24 9.5z"/>
+                                                      <path fill="#34A853" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4 7.1-10 7.1-17z"/>
+                                                      <path fill="#FBBC05" d="M10.5 28.7A14.4 14.4 0 019.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A24 24 0 000 24c0 3.9.9 7.5 2.6 10.7l7.9-6z"/>
+                                                      <path fill="#EA4335" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.5-5.8c-2 1.4-4.6 2.3-7.7 2.3-6.3 0-11.6-3.7-13.5-9.3l-7.9 6C6.7 42.6 14.7 48 24 48z"/>
+                                                    </svg>
+                                                    GPay
+                                                </span>
+                                                <span class="upi-app-btn" onclick="fillUPI('phonepe')">
+                                                    <!-- PhonePe SVG -->
+                                                    <svg width="22" height="22" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                                      <rect width="48" height="48" rx="10" fill="#5f259f"/>
+                                                      <path fill="white" d="M24 8c-8.8 0-16 7.2-16 16s7.2 16 16 16c2 0 4-.4 5.8-1l-1.5-3.6c-1.3.5-2.8.8-4.3.8-6.6 0-12-5.4-12-12s5.4-12 12-12 12 5.4 12 12c0 2.2-.6 4.3-1.7 6.1l3.2 2.2C34.8 30.3 36 27.3 36 24c0-8.8-7.2-16-16-16z"/>
+                                                      <circle fill="#5f259f" cx="29" cy="19" r="4"/>
+                                                      <circle fill="white" cx="29" cy="19" r="2.5"/>
+                                                    </svg>
+                                                    PhonePe
+                                                </span>
+                                                <span class="upi-app-btn" onclick="fillUPI('paytm')">
+                                                    <!-- Paytm SVG -->
+                                                    <svg width="22" height="22" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                                                      <rect width="48" height="48" rx="6" fill="#00B9F1"/>
+                                                      <rect x="6" y="20" width="36" height="18" rx="2" fill="white"/>
+                                                      <text x="24" y="34" text-anchor="middle" font-size="10" font-weight="900" fill="#00B9F1" font-family="Arial">PAYTM</text>
+                                                      <rect x="6" y="10" width="16" height="8" rx="2" fill="white"/>
+                                                      <rect x="26" y="10" width="16" height="8" rx="2" fill="#002970"/>
+                                                      <text x="14" y="17" text-anchor="middle" font-size="6" font-weight="900" fill="#00B9F1" font-family="Arial">Pay</text>
+                                                      <text x="34" y="17" text-anchor="middle" font-size="6" font-weight="900" fill="white" font-family="Arial">tm</text>
+                                                    </svg>
+                                                    Paytm
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Debit Card Panel -->
+                                <div id="panel-DebitCard" class="pay-panel" style="display:none;">
+                                    <div class="card-form-wrap">
+                                        <div class="card-preview">
+                                            <div class="card-chip"><div class="chip-lines"></div></div>
+                                            <div class="card-number-display" id="cardNumDisplay">&#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022;</div>
+                                            <div class="card-bottom-row">
+                                                <div>
+                                                    <div class="card-label-small">CARD HOLDER</div>
+                                                    <div class="card-holder-display" id="cardHolderDisplay">YOUR NAME</div>
+                                                </div>
+                                                <div>
+                                                    <div class="card-label-small">EXPIRES</div>
+                                                    <div class="card-expiry-display" id="cardExpiryDisplay">MM/YY</div>
+                                                </div>
+                                                <div class="card-brand-logo" id="cardBrandLogo">
+                                                    <i class="fas fa-credit-card" style="font-size:1.6rem;opacity:.7;"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-2 mt-2">
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold">Card Number</label>
+                                                <input type="text" id="cardNumber" class="form-control" maxlength="19"
+                                                       placeholder="1234 5678 9012 3456" oninput="formatCard(this)" />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold">Card Holder Name</label>
+                                                <input type="text" id="cardHolder" class="form-control"
+                                                       placeholder="As printed on card" oninput="updateCardDisplay()" />
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">Expiry Date</label>
+                                                <input type="text" id="cardExpiry" class="form-control" maxlength="5"
+                                                       placeholder="MM/YY" oninput="formatExpiry(this)" />
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">CVV</label>
+                                                <div class="cvv-wrap">
+                                                    <input type="password" id="cardCvv" class="form-control" maxlength="3" placeholder="&#x2022;&#x2022;&#x2022;" />
+                                                    <i class="fas fa-question-circle cvv-help" title="3-digit code on back of card"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Credit Card Panel -->
+                                <div id="panel-CreditCard" class="pay-panel" style="display:none;">
+                                    <div class="card-form-wrap">
+                                        <div class="card-preview credit">
+                                            <div class="card-chip"><div class="chip-lines"></div></div>
+                                            <div class="card-number-display" id="cardNumDisplayC">&#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022; &#x2022;&#x2022;&#x2022;&#x2022;</div>
+                                            <div class="card-bottom-row">
+                                                <div>
+                                                    <div class="card-label-small">CARD HOLDER</div>
+                                                    <div class="card-holder-display" id="cardHolderDisplayC">YOUR NAME</div>
+                                                </div>
+                                                <div>
+                                                    <div class="card-label-small">EXPIRES</div>
+                                                    <div class="card-expiry-display" id="cardExpiryDisplayC">MM/YY</div>
+                                                </div>
+                                                <div class="card-brand-logo" id="cardBrandLogoC">
+                                                    <i class="fas fa-credit-card" style="font-size:1.6rem;opacity:.7;"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-2 mt-2">
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold">Card Number</label>
+                                                <input type="text" id="cardNumberC" class="form-control" maxlength="19"
+                                                       placeholder="1234 5678 9012 3456" oninput="formatCardC(this)" />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold">Card Holder Name</label>
+                                                <input type="text" id="cardHolderC" class="form-control"
+                                                       placeholder="As printed on card" oninput="updateCardDisplayC()" />
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">Expiry Date</label>
+                                                <input type="text" id="cardExpiryC" class="form-control" maxlength="5"
+                                                       placeholder="MM/YY" oninput="formatExpiryC(this)" />
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="form-label fw-bold">CVV</label>
+                                                <div class="cvv-wrap">
+                                                    <input type="password" id="cardCvvC" class="form-control" maxlength="4" placeholder="&#x2022;&#x2022;&#x2022;" />
+                                                    <i class="fas fa-question-circle cvv-help" title="3-4 digit code on card"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Net Banking Panel -->
+                                <div id="panel-Netbanking" class="pay-panel" style="display:none;">
+                                    <label class="form-label fw-bold mb-2">Select Your Bank</label>
+                                    <div class="bank-grid">
+                                        <div class="bank-card" onclick="selectBank('SBI','State Bank of India',this)">
+                                            <span class="bank-icon">&#127974;</span><span class="bank-short">SBI</span><span class="bank-name">State Bank of India</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('HDFC','HDFC Bank',this)">
+                                            <span class="bank-icon">&#128309;</span><span class="bank-short">HDFC</span><span class="bank-name">HDFC Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('ICICI','ICICI Bank',this)">
+                                            <span class="bank-icon">&#128992;</span><span class="bank-short">ICICI</span><span class="bank-name">ICICI Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('Axis','Axis Bank',this)">
+                                            <span class="bank-icon">&#128995;</span><span class="bank-short">Axis</span><span class="bank-name">Axis Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('Kotak','Kotak Bank',this)">
+                                            <span class="bank-icon">&#128308;</span><span class="bank-short">Kotak</span><span class="bank-name">Kotak Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('PNB','Punjab National Bank',this)">
+                                            <span class="bank-icon">&#127968;</span><span class="bank-short">PNB</span><span class="bank-name">Punjab National</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('BOB','Bank of Baroda',this)">
+                                            <span class="bank-icon">&#127993;</span><span class="bank-short">BOB</span><span class="bank-name">Bank of Baroda</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('Canara','Canara Bank',this)">
+                                            <span class="bank-icon">&#128994;</span><span class="bank-short">Canara</span><span class="bank-name">Canara Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('IDFC','IDFC First Bank',this)">
+                                            <span class="bank-icon">&#11035;</span><span class="bank-short">IDFC</span><span class="bank-name">IDFC First Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('Yes','Yes Bank',this)">
+                                            <span class="bank-icon">&#128997;</span><span class="bank-short">Yes</span><span class="bank-name">Yes Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('IndusInd','IndusInd Bank',this)">
+                                            <span class="bank-icon">&#128311;</span><span class="bank-short">IndusInd</span><span class="bank-name">IndusInd Bank</span>
+                                        </div>
+                                        <div class="bank-card" onclick="selectBank('UCO','UCO Bank',this)">
+                                            <span class="bank-icon">&#127963;</span><span class="bank-short">UCO</span><span class="bank-name">UCO Bank</span>
+                                        </div>
+                                    </div>
+                                    <div id="netbankingLoginBox" class="netbanking-login mt-3" style="display:none;">
+                                        <div class="netbanking-header" id="netbankingBankName"></div>
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold">User ID / Customer ID</label>
+                                                <input type="text" id="nbUserId" class="form-control" placeholder="Enter your net banking user ID" />
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="form-label fw-bold">Password</label>
+                                                <input type="password" id="nbPassword" class="form-control" placeholder="Enter your net banking password" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pay Button -->
+                                <button type="button" id="payNowBtn" class="btn-pay-now mt-3" onclick="initiatePayment()">
+                                    <i class="fas fa-lock me-2"></i>Pay <span id="payBtnAmount">&#8377;0</span> Securely
+                                </button>
+
+                                <div class="pay-security-note mt-2">
+                                    <i class="fas fa-shield-halved text-success"></i>
+                                    256-bit SSL encrypted &nbsp;&#183;&nbsp; PCI DSS compliant &nbsp;&#183;&nbsp; 100% secure
+                                </div>
+
+                                <button type="button" class="btn btn-outline-secondary btn-sm mt-2 w-100" onclick="goBack()">
+                                    &#8592; Back to seat selection
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden fields -->
+                <input type="hidden" asp-for="TicketPrice" id="finalPrice" />
+                <input type="hidden" asp-for="TotalAmount" id="finalTotal" />
+
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+var selectedPrice = 0;
+var selectedStand = '';
+var selectedPayMethod = 'UPI';
+var currentUserName = '@Html.Raw(userName.Replace("'", "\\'"))';
+
+function onMatchChange() {
+    var sel = document.getElementById('matchSelect');
+    var opt = sel.options[sel.selectedIndex];
+    var preview = document.getElementById('matchPreview');
+    if (!opt.value) { preview.style.display = 'none'; return; }
+    preview.innerHTML =
+        '<span class="preview-item"><i class="fas fa-trophy"></i>' + (opt.dataset.series || '') + '</span>' +
+        '<span class="preview-item"><i class="fas fa-calendar"></i>' + (opt.dataset.date || '') + '</span>' +
+        '<span class="preview-item"><i class="fas fa-clock"></i>' + (opt.dataset.time || '') + '</span>' +
+        '<span class="preview-badge format-' + (opt.dataset.format || '').toLowerCase() + '">' + (opt.dataset.format || '') + '</span>';
+    preview.style.display = 'flex';
+    document.getElementById('sum-match').textContent = opt.dataset.name || '\u2014';
+    document.getElementById('sum-date').textContent = opt.dataset.date || '\u2014';
+}
+
+function selectStand(stand, price) {
+    document.querySelectorAll('.stand-card-new').forEach(function(c) { c.classList.remove('selected'); });
+    document.querySelector('[data-stand="' + stand + '"]').classList.add('selected');
+    document.getElementById('standInput').value = stand;
+    selectedPrice = price;
+    selectedStand = stand;
+    var names = {A:'General', B:'Premium', C:'Club', D:'VIP'};
+    document.getElementById('sum-stand').textContent = 'Stand ' + stand + ' \u2014 ' + names[stand];
+    document.getElementById('sum-price').textContent = '\u20B9' + price.toLocaleString('en-IN');
+    calcTotal();
+}
+
+function changeQty(delta) {
+    var inp = document.getElementById('numTickets');
+    var v = parseInt(inp.value) || 1;
+    v = Math.min(20, Math.max(1, v + delta));
+    inp.value = v;
+    calcTotal();
+}
+
+function calcTotal() {
+    var qty = parseInt(document.getElementById('numTickets').value) || 0;
+    var total = selectedPrice * qty;
+    document.getElementById('sum-qty').textContent = qty;
+    document.getElementById('sum-total').textContent = '\u20B9' + total.toLocaleString('en-IN');
+    document.getElementById('pay-banner-amount').textContent = '\u20B9' + total.toLocaleString('en-IN');
+    document.getElementById('payBtnAmount').textContent = '\u20B9' + total.toLocaleString('en-IN');
+    document.getElementById('finalPrice').value = selectedPrice;
+    document.getElementById('finalTotal').value = total;
+}
+
+function setStep(n) {
+    document.querySelectorAll('.step').forEach(function(s, i) {
+        s.classList.toggle('active', i < n);
+        s.classList.toggle('done', i < n - 1);
+    });
+}
+
+function goToPayment() {
+    var matchId = document.getElementById('matchSelect').value;
+    if (!matchId) { alert('Please select a match.'); return; }
+    if (!selectedStand) { alert('Please select a stand.'); return; }
+    var qty = parseInt(document.getElementById('numTickets').value) || 0;
+    if (qty < 1) { alert('Please enter number of tickets.'); return; }
+    document.getElementById('page1').style.display = 'none';
+    document.getElementById('page2').style.display = '';
+    setStep(2);
+    calcTotal();
+    window.scrollTo(0, 0);
+}
+
+function goBack() {
+    document.getElementById('page2').style.display = 'none';
+    document.getElementById('page1').style.display = '';
+    document.getElementById('otpSection').style.display = 'none';
+    document.getElementById('payNowBtn').style.display = '';
+    setStep(1);
+}
+
+function selectPayMethod(method, btn) {
+    selectedPayMethod = method;
+    document.querySelectorAll('.pay-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('paymentMethodInput').value = method;
+    document.querySelectorAll('.pay-panel').forEach(function(p) { p.style.display = 'none'; });
+    var panelId = 'panel-' + method.replace(' ', '');
+    var panel = document.getElementById(panelId);
+    if (panel) panel.style.display = '';
+    document.getElementById('otpSection').style.display = 'none';
+    document.getElementById('payNowBtn').style.display = '';
+}
+
+function fillUPI(app) {
+    var suffix = app === 'gpay' ? '@@okaxis' : app === 'phonepe' ? '@@ybl' : '@@paytm';
+    document.getElementById('upiId').value = currentUserName.toLowerCase().replace(/\s/g, '') + suffix;
+    verifyUPI();
+}
+
+function verifyUPI() {
+    var val = document.getElementById('upiId').value.trim();
+    var status = document.getElementById('upiStatus');
+    if (!val.includes('@@')) {
+        status.style.display = '';
+        status.className = 'upi-status error';
+        status.innerHTML = '<i class="fas fa-times-circle"></i> Invalid UPI ID. Must contain @@';
+        return;
+    }
+    status.style.display = '';
+    status.className = 'upi-status loading';
+    status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying UPI ID...';
+    setTimeout(function() {
+        status.className = 'upi-status success';
+        status.innerHTML = '<i class="fas fa-check-circle"></i> UPI ID verified successfully!';
+    }, 1200);
+}
+
+function formatCard(inp) {
+    var v = inp.value.replace(/\D/g, '').substring(0, 16);
+    inp.value = v.replace(/(.{4})/g, '$1 ').trim();
+    var display = v.padEnd(16, '\u2022').replace(/(.{4})/g, '$1 ').trim();
+    document.getElementById('cardNumDisplay').textContent = display;
+    var logo = document.getElementById('cardBrandLogo');
+    if (v.startsWith('4')) logo.innerHTML = '<span style="color:#1a1f71;font-weight:900;font-size:.9rem;">VISA</span>';
+    else if (/^5[1-5]/.test(v)) logo.innerHTML = '<span style="color:#eb001b;font-size:.75rem;font-weight:900;">MASTER<br>CARD</span>';
+    else if (v.startsWith('6')) logo.innerHTML = '<span style="color:#FF6600;font-weight:900;font-size:.85rem;">RuPay</span>';
+    else logo.innerHTML = '<i class="fas fa-credit-card" style="font-size:1.6rem;opacity:.7;"></i>';
+}
+function formatCardC(inp) {
+    var v = inp.value.replace(/\D/g, '').substring(0, 16);
+    inp.value = v.replace(/(.{4})/g, '$1 ').trim();
+    var display = v.padEnd(16, '\u2022').replace(/(.{4})/g, '$1 ').trim();
+    document.getElementById('cardNumDisplayC').textContent = display;
+    var logo = document.getElementById('cardBrandLogoC');
+    if (v.startsWith('4')) logo.innerHTML = '<span style="color:#fff;font-weight:900;font-size:.9rem;">VISA</span>';
+    else if (/^5[1-5]/.test(v)) logo.innerHTML = '<span style="color:#eb001b;font-size:.75rem;font-weight:900;">MASTER<br>CARD</span>';
+    else logo.innerHTML = '<i class="fas fa-credit-card" style="font-size:1.6rem;opacity:.7;"></i>';
+}
+function updateCardDisplay() {
+    document.getElementById('cardHolderDisplay').textContent = (document.getElementById('cardHolder').value.toUpperCase()) || 'YOUR NAME';
+}
+function updateCardDisplayC() {
+    document.getElementById('cardHolderDisplayC').textContent = (document.getElementById('cardHolderC').value.toUpperCase()) || 'YOUR NAME';
+}
+function formatExpiry(inp) {
+    var v = inp.value.replace(/\D/g, '');
+    if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2, 4);
+    inp.value = v;
+    document.getElementById('cardExpiryDisplay').textContent = v || 'MM/YY';
+}
+function formatExpiryC(inp) {
+    var v = inp.value.replace(/\D/g, '');
+    if (v.length > 2) v = v.substring(0, 2) + '/' + v.substring(2, 4);
+    inp.value = v;
+    document.getElementById('cardExpiryDisplayC').textContent = v || 'MM/YY';
+}
+
+function selectBank(code, name, el) {
+    document.querySelectorAll('.bank-card').forEach(function(b) { b.classList.remove('selected'); });
+    el.classList.add('selected');
+    document.getElementById('netbankingLoginBox').style.display = '';
+    document.getElementById('netbankingBankName').innerHTML =
+        '<i class="fas fa-building-columns me-2"></i>Login to <strong>' + name + '</strong>';
+}
+
+function initiatePayment() {
+    if (selectedPayMethod === 'UPI') {
+        var uid = document.getElementById('upiId').value.trim();
+        if (!uid.includes('@@')) {
+            var st = document.getElementById('upiStatus');
+            st.style.display = '';
+            st.className = 'upi-status error';
+            st.innerHTML = '<i class="fas fa-times-circle"></i> Please enter a valid UPI ID first.';
+            return;
+        }
+    } else if (selectedPayMethod === 'Debit Card') {
+        var num = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        var exp = document.getElementById('cardExpiry').value;
+        var cvv = document.getElementById('cardCvv').value;
+        var nm = document.getElementById('cardHolder').value;
+        if (num.length < 16 || !exp.includes('/') || cvv.length < 3 || !nm.trim()) {
+            alert('Please fill in all card details correctly.'); return;
+        }
+    } else if (selectedPayMethod === 'Credit Card') {
+        var numC = document.getElementById('cardNumberC').value.replace(/\s/g, '');
+        var expC = document.getElementById('cardExpiryC').value;
+        var cvvC = document.getElementById('cardCvvC').value;
+        var nmC = document.getElementById('cardHolderC').value;
+        if (numC.length < 16 || !expC.includes('/') || cvvC.length < 3 || !nmC.trim()) {
+            alert('Please fill in all card details correctly.'); return;
+        }
+    } else if (selectedPayMethod === 'Netbanking') {
+        var nbUid = document.getElementById('nbUserId').value.trim();
+        var nbPwd = document.getElementById('nbPassword').value;
+        if (!nbUid || !nbPwd) { alert('Please enter your net banking credentials.'); return; }
+        if (!document.querySelector('.bank-card.selected')) { alert('Please select a bank.'); return; }
+    }
+    document.getElementById('payNowBtn').style.display = 'none';
+    document.getElementById('payNowBtn').innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    document.getElementById('payNowBtn').disabled = true;
+    setStep(3);
+    setTimeout(function() { document.getElementById('bookForm').submit(); }, 800);
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+    onMatchChange();
+    calcTotal();
+});
+</script>
+}

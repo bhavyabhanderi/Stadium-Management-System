@@ -1,0 +1,29 @@
+@{
+    var ctrl = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<div class="sidebar sidebar-staff">
+    <div class="sidebar-brand">
+        <div class="brand-crest">🛡️</div>
+        <h5>NM Stadium</h5>
+        <small>Staff Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Overview</div>
+        <a href="/Staff/Dashboard" class="@(ctrl=="Dashboard"?"active":"")">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </a>
+        <div class="nav-section">Manage</div>
+        <a href="/Staff/Matches" class="@(ctrl is "Matches" or "AddMatch"?"active":"")">
+            <i class="fas fa-calendar-days"></i> Matches
+        </a>
+        <a href="/Staff/Tickets" class="@(ctrl=="Tickets"?"active":"")">
+            <i class="fas fa-ticket"></i> All Tickets
+        </a>
+        <a href="/Staff/Users" class="@(ctrl is "Users" or "UserDetail"?"active":"")">
+            <i class="fas fa-users"></i> Users
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/Staff/Logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</div>

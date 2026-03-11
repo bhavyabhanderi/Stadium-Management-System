@@ -1,0 +1,151 @@
+@model List<Match>
+@{ ViewData["Title"] = "Matches"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_UserSidebar")
+    <div class="main-content">
+        <div class="top-bar">
+            <h4>🏏 All Matches</h4>
+            <div class="user-info"><i class="fas fa-user-circle"></i> <span>@Context.Session.GetString("UserName")</span></div>
+        </div>
+        <div class="page-body">
+
+            <!-- Search & Filter Bar -->
+            <div class="filter-bar mb-4">
+                <div class="filter-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="matchSearch" placeholder="Search matches..." oninput="filterMatches()" />
+                </div>
+                <div class="filter-btns">
+                    <button class="filter-btn active" onclick="filterFormat('ALL', this)">All</button>
+                    <button class="filter-btn" onclick="filterFormat('T20', this)">T20</button>
+                    <button class="filter-btn" onclick="filterFormat('ODI', this)">ODI</button>
+                    <button class="filter-btn" onclick="filterFormat('TEST', this)">Test</button>
+                </div>
+            </div>
+
+            <div class="row g-3" id="matchGrid">
+                @foreach (var m in Model)
+                {
+                    <div class="col-md-4 col-sm-6 match-item" data-format="@m.MatchFormat.ToUpper()" data-name="@m.MatchName.ToLower()">
+                        <div class="match-card-new">
+                            <div class="match-flag-banner">
+                                @{
+                                    var flags = m.GetFlagUrls();
+                                    var parts = m.MatchName.Split(new[]{"vs","VS"}, StringSplitOptions.None);
+                                    var team1 = parts.Length > 0 ? parts[0].Trim() : m.MatchName;
+                                    var team2 = parts.Length > 1 ? parts[1].Trim() : "";
+                                    var iplTeams = m.GetIplTeams();
+                                }
+                                @if (m.IsIPL() && iplTeams.Count >= 2)
+                                {
+                                    <!-- IPL match with 2 known teams: show real logos -->
+                                    <div class="ipl-match-banner" style="background: linear-gradient(135deg, @iplTeams[0].PrimaryColor 0%, #050a14 50%, @iplTeams[1].PrimaryColor 100%);">
+                                        <div class="ipl-team-side">
+                                            <div class="ipl-logo-svg" style="--team-bg:@iplTeams[0].PrimaryColor; --team-glow:@(iplTeams[0].PrimaryColor)88;">
+                                                @Html.Raw(IplSvgHelper.GetLogo(iplTeams[0].Code))
+                                            </div>
+                                            <span class="ipl-team-label">@iplTeams[0].Code</span>
+                                        </div>
+                                        <div class="ipl-vs-badge">VS</div>
+                                        <div class="ipl-team-side">
+                                            <div class="ipl-logo-svg" style="--team-bg:@iplTeams[1].PrimaryColor; --team-glow:@(iplTeams[1].PrimaryColor)88;">
+                                                @Html.Raw(IplSvgHelper.GetLogo(iplTeams[1].Code))
+                                            </div>
+                                            <span class="ipl-team-label">@iplTeams[1].Code</span>
+                                        </div>
+                                        <div class="ipl-top-badge">🏆 IPL</div>
+                                    </div>
+                                }
+                                else if (m.IsIPL() && iplTeams.Count == 1)
+                                {
+                                    <!-- IPL match with 1 known team -->
+                                    <div class="ipl-match-banner" style="background: linear-gradient(135deg, @iplTeams[0].PrimaryColor, #050a14);">
+                                        <div class="ipl-team-side">
+                                            <div class="ipl-logo-svg" style="--team-bg:@iplTeams[0].PrimaryColor; --team-glow:@(iplTeams[0].PrimaryColor)88;">
+                                                @Html.Raw(IplSvgHelper.GetLogo(iplTeams[0].Code))
+                                            </div>
+                                            <span class="ipl-team-label">@iplTeams[0].FullName</span>
+                                        </div>
+                                        <div class="ipl-top-badge">🏆 IPL</div>
+                                    </div>
+                                }
+                                else if (m.IsIPL())
+                                {
+                                    <!-- Generic IPL banner -->
+                                    <div class="ipl-banner">
+                                        <span class="ipl-logo">🏆 IPL</span>
+                                        <div class="ipl-glow"></div>
+                                    </div>
+                                }
+                                else if (flags.Length >= 2)
+                                {
+                                    <div class="flag-vs-container">
+                                        <div class="flag-side">
+                                            <img src="@flags[0]" alt="@team1" class="flag-img" />
+                                            <span class="flag-team-name">@team1</span>
+                                        </div>
+                                        <div class="vs-circle">VS</div>
+                                        <div class="flag-side">
+                                            <img src="@flags[1]" alt="@team2" class="flag-img" />
+                                            <span class="flag-team-name">@team2</span>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="flag-vs-container">
+                                        <span style="font-size:2.5rem;">🏏</span>
+                                        <span class="flag-team-name" style="font-size:.9rem;margin-top:.5rem;">@m.MatchName</span>
+                                    </div>
+                                }
+                                <div class="format-ribbon format-@m.MatchFormat.ToLower()">@m.MatchFormat</div>
+                            </div>
+                            <div class="match-card-body-new">
+                                <div class="match-title-new">@m.MatchName</div>
+                                <div class="match-sub"><i class="fas fa-trophy"></i>@m.SeriesTournamentName</div>
+                                <div class="match-datetime">
+                                    <span><i class="fas fa-calendar-day"></i>@m.MatchDate</span>
+                                    <span><i class="fas fa-clock"></i>@m.MatchTime</span>
+                                </div>
+                                <a href="/User/BookTicket?matchId=@m.MatchId" class="btn-book-ticket">
+                                    <i class="fas fa-ticket"></i> Book Ticket
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div id="noResults" class="text-center py-5" style="display:none;">
+                <div style="font-size:3rem;">🔍</div>
+                <h5 class="mt-2 text-muted">No matches found</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let currentFormat = 'ALL';
+function filterMatches() {
+    const q = document.getElementById('matchSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.match-item');
+    let visible = 0;
+    items.forEach(item => {
+        const name = item.dataset.name;
+        const fmt = item.dataset.format;
+        const ok = name.includes(q) && (currentFormat === 'ALL' || fmt === currentFormat);
+        item.style.display = ok ? '' : 'none';
+        if (ok) visible++;
+    });
+    document.getElementById('noResults').style.display = visible === 0 ? '' : 'none';
+}
+function filterFormat(format, btn) {
+    currentFormat = format;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterMatches();
+}
+</script>
+}

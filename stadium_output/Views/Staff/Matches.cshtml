@@ -1,0 +1,148 @@
+@model List<Match>
+@{ ViewData["Title"] = "Matches"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_StaffSidebar")
+    <div class="main-content">
+        <div class="top-bar">
+            <h4>📅 Manage Matches</h4>
+            <a href="/Staff/AddMatch" class="btn btn-staff btn-sm px-3">
+                <i class="fas fa-plus me-1"></i>Add Match
+            </a>
+        </div>
+        <div class="page-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible"><i class="fas fa-check-circle me-2"></i>@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            }
+
+            <!-- Featured Match Cards (top 4) -->
+            <div class="row g-3 mb-4">
+                @foreach (var m in Model.Take(4))
+                {
+                    var flags = m.GetFlagUrls();
+                    var parts = m.MatchName.Split(new[]{"vs","VS"}, StringSplitOptions.None);
+                    var team1 = parts.Length > 0 ? parts[0].Trim() : m.MatchName;
+                    var team2 = parts.Length > 1 ? parts[1].Trim() : "";
+                    var iplTeamsFeatured = m.GetIplTeams();
+                    <div class="col-md-3 col-sm-6">
+                        <div class="match-card-new compact">
+                            <div class="match-flag-banner" style="height:90px;">
+                                @if (m.IsIPL() && iplTeamsFeatured.Count >= 2)
+                                {
+                                    <div class="ipl-match-banner" style="background: linear-gradient(135deg, @iplTeamsFeatured[0].PrimaryColor 0%, #111 50%, @iplTeamsFeatured[1].PrimaryColor 100%);">
+                                        <div class="ipl-team-side">
+                                            <div class="ipl-logo-circle" style="width:46px;height:46px;background:@iplTeamsFeatured[0].PrimaryColor;border-color:@iplTeamsFeatured[0].AccentColor;">
+                                                <span class="ipl-team-code" style="font-size:.75rem;color:@iplTeamsFeatured[0].AccentColor;">@iplTeamsFeatured[0].Code</span>
+                                            </div>
+                                            <span class="ipl-team-label">@iplTeamsFeatured[0].Code</span>
+                                        </div>
+                                        <div class="ipl-vs-badge" style="width:28px;height:28px;font-size:.6rem;">VS</div>
+                                        <div class="ipl-team-side">
+                                            <div class="ipl-logo-circle" style="width:46px;height:46px;background:@iplTeamsFeatured[1].PrimaryColor;border-color:@iplTeamsFeatured[1].AccentColor;">
+                                                <span class="ipl-team-code" style="font-size:.75rem;color:@iplTeamsFeatured[1].AccentColor;">@iplTeamsFeatured[1].Code</span>
+                                            </div>
+                                            <span class="ipl-team-label">@iplTeamsFeatured[1].Code</span>
+                                        </div>
+                                        <div class="ipl-top-badge">🏆 IPL</div>
+                                    </div>
+                                }
+                                else if (flags.Length >= 2)
+                                {
+                                    <div class="flag-vs-container">
+                                        <div class="flag-side"><img src="@flags[0]" class="flag-img sm" alt="@team1" /><span class="flag-team-name sm">@team1</span></div>
+                                        <div class="vs-circle sm">VS</div>
+                                        <div class="flag-side"><img src="@flags[1]" class="flag-img sm" alt="@team2" /><span class="flag-team-name sm">@team2</span></div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="flag-vs-container"><span style="font-size:2rem;">🏏</span></div>
+                                }
+                                <div class="format-ribbon format-@m.MatchFormat.ToLower()">@m.MatchFormat</div>
+                            </div>
+                            <div class="match-card-body-new" style="padding:.75rem;">
+                                <div class="match-title-new" style="font-size:.85rem;">@m.MatchName</div>
+                                <div class="match-sub" style="font-size:.72rem;"><i class="fas fa-calendar"></i>@m.MatchDate</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Full Table -->
+            <div class="content-card">
+                <div class="content-card-title d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-table text-primary"></i> All Matches (@Model.Count)</span>
+                    <input type="text" id="tableSearch" class="form-control form-control-sm" style="width:220px;" placeholder="🔍 Search..." oninput="searchTable()" />
+                </div>
+                <div class="table-responsive">
+                    <table class="table-custom w-100" id="matchTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th><th>Match</th><th>Flags</th><th>Series / Tournament</th>
+                                <th>Format</th><th>Date</th><th>Time</th><th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var m in Model)
+                            {
+                                var flags = m.GetFlagUrls();
+                                var iplTeamsStaff = m.GetIplTeams();
+                                <tr>
+                                    <td>#@m.MatchId</td>
+                                    <td><strong>@m.MatchName</strong></td>
+                                    <td>
+                                        @if (m.IsIPL() && iplTeamsStaff.Count >= 1)
+                                        {
+                                            @foreach (var t in iplTeamsStaff)
+                                            {
+                                                <span style="display:inline-flex;align-items:center;gap:4px;margin-right:6px;
+                                                             background:@t.PrimaryColor;color:@t.AccentColor;
+                                                             padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:900;
+                                                             border:1.5px solid @t.AccentColor;letter-spacing:.05em;">
+                                                    @t.Code
+                                                </span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @foreach (var f in flags)
+                                            {
+                                                <img src="@f" style="height:18px;width:28px;object-fit:cover;border-radius:2px;margin-right:3px;border:1px solid #ddd;" />
+                                            }
+                                        }
+                                    </td>
+                                    <td>@m.SeriesTournamentName</td>
+                                    <td><span class="format-badge format-@m.MatchFormat.ToLower()">@m.MatchFormat</span></td>
+                                    <td>@m.MatchDate</td>
+                                    <td>@m.MatchTime</td>
+                                    <td>
+                                        <form asp-action="RemoveMatch" method="post" style="display:inline;">
+                                            <input type="hidden" name="matchId" value="@m.MatchId" />
+                                            <button type="submit" class="btn btn-danger btn-sm"
+                                                    onclick="return confirm('Remove match @m.MatchName?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function searchTable() {
+    const q = document.getElementById('tableSearch').value.toLowerCase();
+    document.querySelectorAll('#matchTable tbody tr').forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+}

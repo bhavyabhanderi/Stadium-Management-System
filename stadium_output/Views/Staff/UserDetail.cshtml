@@ -1,0 +1,31 @@
+@model StadiumWeb.Models.User
+@{ ViewData["Title"] = "User Detail"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_StaffSidebar")
+    <div class="main-content">
+        <div class="top-bar"><h4>👤 User Detail</h4></div>
+        <div class="page-body">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="content-card">
+                        <div class="content-card-title"><i class="fas fa-user text-primary"></i> User Info</div>
+                        <div class="mb-3">
+                            <label class="form-label">User ID</label>
+                            <div class="form-control bg-light">#@Model.UserId</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <div class="form-control bg-light">@Model.UserName</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mobile Number</label>
+                            <div class="form-control bg-light">@Model.MobileNo</div>
+                        </div>
+                        <a href="/Staff/Users" class="btn btn-staff w-100 mt-2">← Back to Users</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,25 @@
+@{ ViewData["Title"] = "Delete Account"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_UserSidebar")
+    <div class="main-content">
+        <div class="top-bar"><h4>⚠️ Delete Account</h4></div>
+        <div class="page-body">
+            <div class="row justify-content-center">
+                <div class="col-md-5">
+                    <div class="content-card" style="border-top:4px solid #c62828;">
+                        <div class="content-card-title" style="color:#c62828;"><i class="fas fa-triangle-exclamation"></i> Danger Zone</div>
+                        <p>This will permanently delete your account and <strong>all your tickets</strong>. This action cannot be undone.</p>
+                        <form asp-action="DeleteAccountConfirm" method="post">
+                            <button type="submit" class="btn btn-danger w-100 py-2"
+                                    onclick="return confirm('Are you sure? This is permanent!')">
+                                <i class="fas fa-trash me-2"></i>Yes, Delete My Account
+                            </button>
+                        </form>
+                        <a href="/User/Dashboard" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

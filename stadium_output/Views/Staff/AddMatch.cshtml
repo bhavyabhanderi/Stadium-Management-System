@@ -1,0 +1,114 @@
+@model AddMatchViewModel
+@{ ViewData["Title"] = "Add Match"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_StaffSidebar")
+    <div class="main-content">
+        <div class="top-bar"><h4>➕ Add New Match</h4></div>
+        <div class="page-body">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="content-card">
+                        <div class="content-card-title"><i class="fas fa-plus-circle text-primary"></i> Match Details</div>
+                        @if (ViewBag.Error != null) { <div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>@ViewBag.Error</div> }
+
+                        <!-- Preview Banner -->
+                        <div id="matchPreviewBanner" class="match-flag-banner mb-3" style="border-radius:var(--radius-sm);height:90px;">
+                            <div class="flag-vs-container" id="previewContainer">
+                                <span style="font-size:2rem;position:relative;z-index:2;">🏏</span>
+                                <span id="previewText" style="color:rgba(255,255,255,.6);font-size:.8rem;position:relative;z-index:2;">Fill in match name to preview</span>
+                            </div>
+                        </div>
+
+                        <form asp-action="AddMatch" method="post">
+                            <div class="row g-3">
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold">Match ID</label>
+                                    <input asp-for="MatchId" class="form-control" placeholder="e.g. 135" type="number" />
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label fw-bold">Match Name</label>
+                                    <input asp-for="MatchName" class="form-control" placeholder="IND vs PAK" id="matchNameInput" oninput="updatePreview()" />
+                                    <small class="text-muted">Use team codes: IND, PAK, AUS, ENG, SA, NZ, SL, WI, BAN, AFG</small>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold">Series / Tournament Name</label>
+                                    <input asp-for="SeriesTournamentName" class="form-control" placeholder="IPL / ICC T20 World Cup 2025 / Border-Gavaskar Trophy" />
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label fw-bold">Format</label>
+                                    <select asp-for="MatchFormat" class="form-control">
+                                        <option value="">-- Select --</option>
+                                        <option value="T20">🏏 T20</option>
+                                        <option value="ODI">🏆 ODI</option>
+                                        <option value="Test">📋 Test</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label fw-bold">Date (dd/mm/yyyy)</label>
+                                    <input asp-for="MatchDate" class="form-control" placeholder="25/04/2025" />
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="form-label fw-bold">Time (hh:mm:ss)</label>
+                                    <input asp-for="MatchTime" class="form-control" placeholder="14:00:00" />
+                                </div>
+
+                                <!-- Ticket Price Guide -->
+                                <div class="col-12">
+                                    <div class="alert alert-info" style="font-size:.8rem;padding:.75rem;">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Stand Prices:</strong> Stand A (General) ₹1,000 &nbsp;|&nbsp;
+                                        Stand B (Premium) ₹7,000 &nbsp;|&nbsp; Stand C (Club) ₹5,000 &nbsp;|&nbsp; Stand D (VIP) ₹10,000
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <button type="submit" class="btn btn-staff w-100 py-2">
+                                        <i class="fas fa-save me-2"></i>Add Match
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <a href="/Staff/Matches" class="btn btn-outline-secondary w-100 mt-2">← Back to Matches</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const flagMap = {
+    'IND': 'https://flagcdn.com/w80/in.png',
+    'PAK': 'https://flagcdn.com/w80/pk.png',
+    'AUS': 'https://flagcdn.com/w80/au.png',
+    'ENG': 'https://flagcdn.com/w80/gb-eng.png',
+    'SA':  'https://flagcdn.com/w80/za.png',
+    'NZ':  'https://flagcdn.com/w80/nz.png',
+    'SL':  'https://flagcdn.com/w80/lk.png',
+    'WI':  'https://flagcdn.com/w80/bb.png',
+    'BAN': 'https://flagcdn.com/w80/bd.png',
+    'AFG': 'https://flagcdn.com/w80/af.png',
+};
+function updatePreview() {
+    const name = document.getElementById('matchNameInput').value.toUpperCase();
+    const container = document.getElementById('previewContainer');
+    const found = [];
+    const parts = name.split(/\s*VS\s*/);
+    parts.forEach(p => {
+        const key = Object.keys(flagMap).find(k => p.trim().includes(k));
+        if (key && found.length < 2) found.push({code: key, url: flagMap[key]});
+    });
+    if (found.length >= 2) {
+        container.innerHTML = `
+            <div class="flag-side"><img src="${found[0].url}" class="flag-img" /><span class="flag-team-name">${found[0].code}</span></div>
+            <div class="vs-circle">VS</div>
+            <div class="flag-side"><img src="${found[1].url}" class="flag-img" /><span class="flag-team-name">${found[1].code}</span></div>`;
+    } else {
+        container.innerHTML = `<span style="font-size:2rem;position:relative;z-index:2;">🏏</span>
+            <span style="color:rgba(255,255,255,.6);font-size:.8rem;position:relative;z-index:2;">Fill in match name to preview</span>`;
+    }
+}
+</script>
+}

@@ -1,0 +1,136 @@
+@{ ViewData["Title"] = "Dashboard"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_UserSidebar")
+    <div class="main-content">
+        <div class="top-bar">
+            <h4>🏠 Dashboard</h4>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>@ViewBag.UserName</span>
+                <span class="badge-role" style="background:#eaf4ea;color:#2e7d32;">Fan</span>
+            </div>
+        </div>
+
+        <div class="page-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible"><i class="fas fa-check-circle me-2"></i>@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            }
+
+            <!-- Welcome Banner -->
+            <div class="welcome-banner mb-4">
+                <div class="welcome-text">
+                    <div class="welcome-greeting">Welcome back, <strong>@ViewBag.UserName</strong>! 👋</div>
+                    <div class="welcome-sub">Ready for the next match? Book your seats now.</div>
+                </div>
+                <a href="/User/BookTicket" class="btn-book-ticket" style="width:auto;padding:.6rem 1.5rem;white-space:nowrap;">
+                    <i class="fas fa-ticket"></i> Book Tickets
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-4">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-ticket"></i></div>
+                        <div>
+                            <div class="stat-value">@ViewBag.TicketCount</div>
+                            <div class="stat-label">My Bookings</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-calendar-days"></i></div>
+                        <div>
+                            <div class="stat-value">@ViewBag.MatchCount</div>
+                            <div class="stat-label">Upcoming Matches</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="stat-card">
+                        <div class="stat-icon gold"><i class="fas fa-indian-rupee-sign"></i></div>
+                        <div>
+                            <div class="stat-value" style="font-size:1.3rem;">₹@String.Format("{0:N0}", ViewBag.TotalSpent)</div>
+                            <div class="stat-label">Total Spent</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="row g-3">
+                <div class="col-md-3 col-6">
+                    <a href="/User/Matches" class="text-decoration-none">
+                        <div class="quick-link-card">
+                            <div style="font-size:2rem;">🏏</div>
+                            <div class="quick-link-label">Browse Matches</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="/User/BookTicket" class="text-decoration-none">
+                        <div class="quick-link-card">
+                            <div style="font-size:2rem;">🎫</div>
+                            <div class="quick-link-label">Book Ticket</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="/User/MyTickets" class="text-decoration-none">
+                        <div class="quick-link-card">
+                            <div style="font-size:2rem;">🎟️</div>
+                            <div class="quick-link-label">My Tickets</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="/User/ChangePassword" class="text-decoration-none">
+                        <div class="quick-link-card">
+                            <div style="font-size:2rem;">🔐</div>
+                            <div class="quick-link-label">Change Password</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stadium Info -->
+            <div class="content-card mt-4">
+                <div class="content-card-title"><i class="fas fa-circle-info text-primary"></i> Stadium Guide</div>
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <div class="stand-info-card" style="border-left:4px solid #2e7d32;">
+                            <div class="stand-info-name">Stand A — General</div>
+                            <div class="stand-info-price">₹1,000</div>
+                            <div class="stand-info-desc">Open seating · Great atmosphere</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stand-info-card" style="border-left:4px solid #6a1b9a;">
+                            <div class="stand-info-name">Stand C — Club</div>
+                            <div class="stand-info-price">₹5,000</div>
+                            <div class="stand-info-desc">Covered seats · Better view</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stand-info-card" style="border-left:4px solid #1565c0;">
+                            <div class="stand-info-name">Stand B — Premium</div>
+                            <div class="stand-info-price">₹7,000</div>
+                            <div class="stand-info-desc">Reserved · Mid-pitch view</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stand-info-card" style="border-left:4px solid #b71c1c;">
+                            <div class="stand-info-name">Stand D — VIP</div>
+                            <div class="stand-info-price">₹10,000</div>
+                            <div class="stand-info-desc">Lounge access · Best seats</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

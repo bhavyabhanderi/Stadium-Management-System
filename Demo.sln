@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StadiumWeb_Enhanced", "StadiumWeb_Enhanced", "{942AB280-66EE-875D-3BBE-122A565F035A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StadiumWeb", "StadiumWeb_Enhanced\StadiumWeb.csproj", "{092174CF-9E65-9538-8BF0-F7C7E194B01F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{092174CF-9E65-9538-8BF0-F7C7E194B01F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{092174CF-9E65-9538-8BF0-F7C7E194B01F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{092174CF-9E65-9538-8BF0-F7C7E194B01F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{092174CF-9E65-9538-8BF0-F7C7E194B01F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{092174CF-9E65-9538-8BF0-F7C7E194B01F} = {942AB280-66EE-875D-3BBE-122A565F035A}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9B9F4C20-3F46-4E2C-8D3A-27380A14382C}
+	EndGlobalSection
+EndGlobal

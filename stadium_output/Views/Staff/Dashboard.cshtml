@@ -1,0 +1,91 @@
+@{ ViewData["Title"] = "Staff Dashboard"; Layout = "_Layout"; }
+
+<div class="app-wrapper">
+    @await Html.PartialAsync("_StaffSidebar")
+    <div class="main-content">
+        <div class="top-bar">
+            <h4>📊 Staff Dashboard</h4>
+            <div class="user-info">
+                <i class="fas fa-shield-halved"></i>
+                <span>Staff #@Context.Session.GetInt32("StaffId")</span>
+                <span class="badge-role" style="background:var(--staff-light);color:var(--staff-blue);">Staff</span>
+            </div>
+        </div>
+
+        <div class="page-body">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">@TempData["Success"]</div>
+            }
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-calendar-days"></i></div>
+                        <div>
+                            <div class="stat-value">@ViewBag.MatchCount</div>
+                            <div class="stat-label">Total Matches</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-ticket"></i></div>
+                        <div>
+                            <div class="stat-value">@ViewBag.TicketCount</div>
+                            <div class="stat-label">Tickets Sold</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="fas fa-users"></i></div>
+                        <div>
+                            <div class="stat-value">@ViewBag.UserCount</div>
+                            <div class="stat-label">Registered Users</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-icon gold"><i class="fas fa-indian-rupee-sign"></i></div>
+                        <div>
+                            <div class="stat-value" style="font-size:1.4rem;">₹@String.Format("{0:N0}", ViewBag.TotalRevenue)</div>
+                            <div class="stat-label">Total Revenue</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="/Staff/Matches" class="text-decoration-none">
+                        <div class="content-card text-center py-4" style="cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                            <div style="font-size:2.5rem;">📅</div>
+                            <h6 class="mt-2 mb-0" style="color:#1a1a2e;">Manage Matches</h6>
+                            <small class="text-muted">Add or remove matches</small>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Staff/Tickets" class="text-decoration-none">
+                        <div class="content-card text-center py-4" style="cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                            <div style="font-size:2.5rem;">🎫</div>
+                            <h6 class="mt-2 mb-0" style="color:#1a1a2e;">View All Tickets</h6>
+                            <small class="text-muted">View booking records</small>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/Staff/Users" class="text-decoration-none">
+                        <div class="content-card text-center py-4" style="cursor:pointer;transition:transform .15s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                            <div style="font-size:2.5rem;">👥</div>
+                            <h6 class="mt-2 mb-0" style="color:#1a1a2e;">User Management</h6>
+                            <small class="text-muted">View registered users</small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

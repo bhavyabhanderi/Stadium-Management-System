@@ -1,0 +1,35 @@
+@{
+    var ctrl = ViewContext.RouteData.Values["action"]?.ToString();
+}
+<div class="sidebar sidebar-user">
+    <div class="sidebar-brand">
+        <div class="brand-crest">🏟️</div>
+        <h5>NM Stadium</h5>
+        <small>Fan Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Menu</div>
+        <a href="/User/Dashboard" class="@(ctrl=="Dashboard"?"active":"")">
+            <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="/User/Matches" class="@(ctrl=="Matches"?"active":"")">
+            <i class="fas fa-cricket-bat-ball"></i> All Matches
+        </a>
+        <a href="/User/BookTicket" class="@(ctrl=="BookTicket"?"active":"")">
+            <i class="fas fa-ticket"></i> Book Ticket
+        </a>
+        <a href="/User/MyTickets" class="@(ctrl=="MyTickets"?"active":"")">
+            <i class="fas fa-list-check"></i> My Tickets
+        </a>
+        <div class="nav-section">Account</div>
+        <a href="/User/ChangePassword" class="@(ctrl=="ChangePassword"?"active":"")">
+            <i class="fas fa-key"></i> Change Password
+        </a>
+        <a href="/User/DeleteAccount" class="@(ctrl=="DeleteAccount"?"active":"")">
+            <i class="fas fa-user-slash"></i> Delete Account
+        </a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/User/Logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</div>
